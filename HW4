@@ -1,0 +1,33 @@
+title 'Faraz Farooq HW 5'; 
+/*Importing the File*/ 
+LIBNAME FF "/home/farazk_9190/sasuser.v94/";  
+DATA gradegsv5; 
+SET FF.gradegsv5; 
+GOPTIONS HTEXT=1 HTITLE=2.5; 
+RUN; 
+ 
+title '1'; 
+PROC GCHART DATA=gradegsv5;  
+PIE LETTER/ type=percent; 
+RUN;  
+ 
+title '2'; 
+PROC GCHART DATA=gradegsv5; 
+VBAR gradeCurved/ subgroup= grade; 
+RUN; 
+ 
+title '3'; 
+DATA DATA gradeActSciMathFin; 
+SET FF.gradegsv5; 
+IF Major1 = "ACTSC" or Major1 = "FINMS" then output; RUN; 
+RUN; 
+ 
+PROC GCHART DATA= gradeactscimathfin; 
+VBAR gradeCurved/group= Major1 type=freq; 
+ 
+RUN; 
+ 
+title '4'; 
+PROC GCHART DATA=gradeactscimathfin; 
+HBAR ClassLevel/ sumvar=FinalScoreCurved TYPE=MEAN; 
+RUN; 
