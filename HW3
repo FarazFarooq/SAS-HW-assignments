@@ -1,0 +1,33 @@
+title 'Faraz Farooq'; title 'HW 4, 6/2/17'; 
+ 
+LIBNAME FF "/home/farazk_9190/FF"; 
+ 
+title "1a"; 
+ 
+DATA gradeGSV4; SET FF.gradegsv3; HWCurved = (((HW1 + HW2 + HW3 + HW4 + HW5 + HW6)- MIN(HW1 , HW2 , HW3 , HW4 , HW5 , HW6))/5); QCurved = (((Q1 + Q2 + Q3 + Q4 + Q5 + Q6+ Q7 + Q8)- MIN(Q1 , Q2 , Q3 , Q4 , Q5 , Q6, Q7, Q8))/7/5)*100; RUN; PROC PRINT DATA = gradeGSV4 (FIRSTOBS =1 OBS = 15) NOOBS N; VAR HWFinal HWCurved QFinal QCurved; RUN; 
+ 
+title "1b"; DATA gradeGSV4; SET gradeGSV4; FinalScore1Curved = .15 *HWCurved + .15 *QCurved + .30 *Midterm + .40 *Final; FinalScore2Curved = .15 *HWCurved + .15 *QCurved + .70 * Final; FinalScoreCurved = MAX(FinalScore1Curved, FinalScore2Curved); DELTASCORE = (FinalScoreCurved - FinalSCore)/(FinalSCore) ; RUN; 
+ 
+PROC SORT DATA = gradeGSV4; BY DESCENDING DELTASCORE; RUN; PROC PRINT DATA = gradeGSV4 (FIRSTOBS=1 OBS=15) NOOBS N; VAR FinalScoreCurved FinalSCore DELTASCORE; RUN; 
+ 
+title "1c"; PROC MEANS DATA= gradeGSV4 MAX MEAN STD; VAR DELTASCORE; RUN; title "1d"; DATA gradeGSV4; SET gradeGSV4; LENGTH GradeCurved $ 2.; LENGTH Curved $3.; IF FinalScoreCurved <60 THEN DO; 
+GradeCurved = 'F'; LetterCurved= 'F'; END; ELSE IF FinalScoreCurved < 63 THEN DO; GradeCurved = 'D-'; LetterCurved = 'D'; END; ELSE IF FinalScoreCurved < 67 THEN DO; GradeCurved = 'D'; LetterCurved = 'D'; END; ELSE IF FinalScoreCurved < 70 THEN DO; GradeCurved = 'D+'; LetterCurved = 'D'; END; ELSE IF FinalScoreCurved < 73 THEN DO; GradeCurved = 'C-'; LetterCurved = 'C'; END; ELSE IF FinalScoreCurved < 77 THEN DO; GradeCurved = 'C'; LetterCurved = 'C'; END; ELSE IF FinalScoreCurved < 80 THEN DO; GradeCurved = 'C+'; LetterCurved = 'C'; END; ELSE IF FinalScoreCurved < 83 THEN DO; GradeCurved = 'B-'; LetterCurved = 'B'; END; ELSE IF FinalScoreCurved < 87 THEN DO; GradeCurved = 'B'; LetterCurved = 'B'; END; ELSE IF FinalScoreCurved < 90 THEN DO; GradeCurved  = 'B+'; LetterCurved = 'B'; END; ELSE IF FinalScoreCurved < 93 THEN DO; GradeCurved = 'A-'; LetterCurved = 'A'; END; ELSE IF FinalScoreCurved < 97 THEN DO; GradeCurved = 'A'; LetterCurved = 'A'; 
+END; ELSE IF FinalScoreCurved < 101 THEN DO; GradeCurved = 'A+'; LetterCurved= 'A'; END; IF FinalSCore = FinalScoreCurved THEN DO; CURVED = 'NO'; END; ELSE IF FINALSCore NE FinalScoreCurved THEN DO; CURVED ='Yes'; END; RUN; PROC PRINT DATA= gradeGSV4 NOOBS N; VAR  GradeCurved LetterCurved FinalScoreCurved FinalSCore CURVED; RUN; 
+ 
+PROC FREQ DATA= gradeGSV4; TABLES CURVED / NOCUM; RUN; 
+ 
+title "2a"; 
+ 
+FILENAME CSV "/home/farazk_9190/sasuser.v94/egrades.csv" TERMSTR=CRLF;  PROC IMPORT DATAFILE=CSV        OUT=EGRADES        DBMS=CSV        REPLACE;  RUN;  DATA EGRADES; SET EGRADES; RENAME Perm__= PERM_NUMBER; KEEP Major1 ClassLevel PERM_NUMBER; RUN; 
+ 
+DATA GradeGSV5; MERGE EGRADES gradeGSV4; RUN; 
+ 
+ 
+DATA Gradegsv5subset; SET GradeGSV5; IF Major1 = "ACTSC" or Major1 = "FINMS" then output; RUN; 
+ 
+PROC SORT DATA= Gradegsv5subset; 
+BY Major1; RUN;   PROC FREQ DATA= Gradegsv5subset; TABLES GradeCurved; BY Major1; RUN; 
+ 
+ 
+title "2b"; PROC MEANS DATA= Gradegsv5subset MEAN Q1 Q3; CLASS Major1; VAR FinalScoreCurved; 
+RUN;
