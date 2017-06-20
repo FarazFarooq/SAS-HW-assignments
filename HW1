@@ -1,0 +1,86 @@
+/** Uploading CSV file inside**/ 
+FILENAME CSV "/home/farazk_9190/PSTAT160AW17GS.csv" TERMSTR=CRLF; 
+PROC IMPORT DATAFILE=CSV 
+      OUT=GRADES 
+      DBMS=CSV 
+      REPLACE; 
+RUN; 
+PROC PRINT DATA=GRADES;  
+RUN; 
+PROC CONTENTS DATA=GRADES; 
+RUN; 
+ 
+DATA GRADES; 
+SET GRADES; 
+RENAME  
+/*Renaming Quizzes*/ 
+Quizz_number_1__ =Q1 Quiz_Number_2__=Q2 Quiz_number_3__=Q3 Quiz_number_4__=Q4 
+Quiz_Number_5__=Q5 Quiz_6__=Q6 Quiz_7__=Q7 Quiz_8__=Q8 
+/*Renaming Homeworks*/ 
+AssignmentHomework_1_due_0127_at=HW1 AssignmentHomework_2_due_0203_at=HW2 AssignmentHomework_3_due_0221_at=HW3 
+AssignmentPython_Homework_4_due_=HW4 AssignmentPython_Homework_5_due_=HW5 AssignmentPython_Homework_6_due_=HW6 
+/*Creating variables Final and Midterm*/ 
+Final__=Final 
+; 
+/*Dropping unnecessary variables*/ 
+DROP Homework_Number_1__ Midterm__  Course_total__; 
+MIDTERM = Midterm__ * 2; 
+RUN; 
+title("Faraz Farooq HW2"); 
+title ("Question 1"); 
+PROC PRINT DATA= GRADES (Firstobs=1 OBS=5) NOOBS; 
+RUN; 
+ 
+ 
+title("Question 2a"); 
+PROC PRINT DATA = GRADES; 
+WHERE enroll_code = 999999; 
+RUN; 
+ 
+title("Question 2b"); 
+DATA GRADESGSV1; 
+SET GRADES; 
+WHERE ENROLL_CODE <> 999999; 
+RUN;  
+PROC CONTENTS DATA= GRADESGSV1; 
+RUN; 
+ 
+title ("Question 3a"); 
+DATA GRADESGSV1; 
+SET GRADESGSV1; 
+QFINAL = (Q1 + Q2 + Q3 + Q4 +Q5 + Q6 + Q7 + Q8)/ 40*100; 
+RUN; 
+PROC SORT DATA =GRADESGSV1; 
+BY QFINAL; 
+RUN; 
+PROC PRINT DATA = GRADESGSV1 NOOBS; 
+WHERE QFINAL =100; 
+VAR PERM_NUMBER QFINAL; 
+RUN; 
+ 
+ 
+title ("Question 3b"); 
+DATA GRADESGSV1; 
+SET GRADESGSV1; 
+HWFINAL = (HW1 + HW2 + HW3 + HW4 +HW5 + HW6)/ 600*100; 
+RUN; 
+PROC SORT DATA = GRADESGSV1; 
+BY DESCENDING HWFINAL; 
+RUN; 
+PROC PRINT DATA = GRADESGSV1 (Firstobs= 118 OBS=122) NOOBS; 
+VAR PERM_NUMBER HWFINAL; 
+RUN; 
+ 
+title("Question 4"); 
+DATA GRADESGSV1; 
+SET GRADESGSV1; 
+/*FINAL SCORE1*/ 
+finalscore1 = .15 *HWFINAL + .15 *QFINAL + .30 *MIDTERM + .40 *Final; 
+/*FINAL SCORE2*/ 
+finalscore2 = .15 *HWFINAL + .15 *QFINAL + .70 * Final; 
+FINALSCORE = MAX(finalscore1,finalscore2); 
+RUN; 
+PROC PRINT DATA =GRADESGSV1 NOOBS; 
+WHERE FINALSCORE > 97; 
+VAR PERM_NUMBER FINALSCORE; 
+RUN;
